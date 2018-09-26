@@ -7,3 +7,20 @@
     text-align: center;
 }
 
+.tile {
+  margin: 30px 100px;
+  padding: 38px 30px;
+}
+
+/* #question-mark {
+  color: yellow;
+  weight: 600;
+} */
+
+#show {
+  background-color: #ecc9ff;
+}
+
+#back-side {
+  background-color: gray;
+}
