@@ -16,6 +16,10 @@
   margin-left: 50px;
 }
 
+#match {
+  background-color: #b4fca4;
+}
+
 #score {
   margin-left: 50px;
 }
@@ -25,7 +29,7 @@
 }
 
 #tile-content {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 18px;
 }
 

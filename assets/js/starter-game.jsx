@@ -35,22 +35,22 @@ shuffle(tiles) {
   // exposing the letter
   initalizeTiles() {
     let tiles = [
-              { letter: 'A', flipped: 0 },
-              { letter: 'A', flipped: 0 },
-              { letter: 'B', flipped: 0 },
-              { letter: 'B', flipped: 0 },
-              { letter: 'C', flipped: 0 },
-              { letter: 'C', flipped: 0 },
-              { letter: 'D', flipped: 0 },
-              { letter: 'D', flipped: 0 },
-              { letter: 'E', flipped: 0 },
-              { letter: 'E', flipped: 0 },
-              { letter: 'F', flipped: 0 },
-              { letter: 'F', flipped: 0 },
-              { letter: 'G', flipped: 0 },
-              { letter: 'G', flipped: 0 },
-              { letter: 'H', flipped: 0 },
-              { letter: 'H', flipped: 0 }];
+              { letter: 'A', flipped: 0, matched: 0},
+              { letter: 'A', flipped: 0, matched: 0},
+              { letter: 'B', flipped: 0, matched: 0},
+              { letter: 'B', flipped: 0, matched: 0},
+              { letter: 'C', flipped: 0, matched: 0},
+              { letter: 'C', flipped: 0, matched: 0},
+              { letter: 'D', flipped: 0, matched: 0},
+              { letter: 'D', flipped: 0, matched: 0},
+              { letter: 'E', flipped: 0, matched: 0},
+              { letter: 'E', flipped: 0, matched: 0},
+              { letter: 'F', flipped: 0, matched: 0},
+              { letter: 'F', flipped: 0, matched: 0},
+              { letter: 'G', flipped: 0, matched: 0},
+              { letter: 'G', flipped: 0, matched: 0},
+              { letter: 'H', flipped: 0, matched: 0},
+              { letter: 'H', flipped: 0, matched: 0}];
     this.shuffle(tiles);
     return tiles;
   }
@@ -81,6 +81,7 @@ shuffle(tiles) {
     let last_tile = this.state.last_tile;
     if (this.state.last_tile == null) {
       let new_state_1 = _.extend(this.state, {
+        tiles: this.state.tiles,
         last_tile: currentTile,
       });
       this.setState(new_state_1);
@@ -90,10 +91,14 @@ shuffle(tiles) {
         currentTile.flipped = 0;
         last_tile.flipped = 0;
       }
-      let new_state = {
+      else {
+        currentTile.matched = 1;
+        last_tile.matched = 1;
+      }
+      let new_state = _.extend(this.state, {
         tiles: this.state.tiles,
         last_tile : null
-      }
+      });
       this.setState(new_state);
     }
 
@@ -113,7 +118,7 @@ shuffle(tiles) {
   // Renders a Tile from the game's tiles given an index.
   renderTile(i) {
     let tile = this.state.tiles[i];
-    return (<Tile letter={tile.letter} flipped={tile.flipped} onClick={() => this.handleClick(i)}/>);
+    return (<Tile letter={tile.letter} matched={tile.matched} flipped={tile.flipped} onClick={() => this.handleClick(i)}/>);
   }
 
   // Renders the entire game
@@ -156,8 +161,11 @@ shuffle(tiles) {
 
 // Represents a Tile
 function Tile(params) {
-  let tile_id = params.flipped ? "show" : "back-side";
-  let content = params.flipped ? params.letter : "?";
+  let flipped = params.flipped ? "show" : "back-side";
+  let tile_id = params.matched ? "match" : flipped;
+  // content before determining if an item was matched
+  let before_match = params.flipped ? params.letter : "?";
+  let content = params.matched ? "✔" : before_match;
   let click = params.flipped ? undefined : params.onClick;
       return (
         <a className="tile" id={tile_id} onClick={click}>
