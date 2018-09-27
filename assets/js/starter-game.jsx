@@ -17,6 +17,9 @@ class MatchingGame extends React.Component {
     };
   }
 
+// When given a list of tiles, randomly shuffles them.
+// Shuffling function was based off of this tutorial:
+// https://www.kirupa.com/html5/shuffling_array_js.htm
 shuffle(tiles) {
     for (let i = tiles.length - 1; i>=0; i--) {
       let random_index = Math.floor(Math.random() * (i + 1));
@@ -26,29 +29,37 @@ shuffle(tiles) {
     }
   }
 
-  // shuffle cards at the start of the game
+  // shuffle tiles at the start of the game
+  // A tile is a dictionary that contains information about the letter and
+  // whether it should be flipped at the current instance of the game,
+  // exposing the letter
   initalizeTiles() {
     let tiles = [
-              { letter: 'A', flipped: 0 },
-              { letter: 'A', flipped: 0 },
-              { letter: 'B', flipped: 0 },
-              { letter: 'B', flipped: 0 },
-              { letter: 'C', flipped: 0 },
-              { letter: 'C', flipped: 0 },
-              { letter: 'D', flipped: 0 },
-              { letter: 'D', flipped: 0 },
-              { letter: 'E', flipped: 0 },
-              { letter: 'E', flipped: 0 },
-              { letter: 'F', flipped: 0 },
-              { letter: 'F', flipped: 0 },
-              { letter: 'G', flipped: 0 },
-              { letter: 'G', flipped: 0 },
-              { letter: 'H', flipped: 0 },
-              { letter: 'H', flipped: 0 }]
+              { letter: 'A', flipped: 0, matched: 0},
+              { letter: 'A', flipped: 0, matched: 0},
+              { letter: 'B', flipped: 0, matched: 0},
+              { letter: 'B', flipped: 0, matched: 0},
+              { letter: 'C', flipped: 0, matched: 0},
+              { letter: 'C', flipped: 0, matched: 0},
+              { letter: 'D', flipped: 0, matched: 0},
+              { letter: 'D', flipped: 0, matched: 0},
+              { letter: 'E', flipped: 0, matched: 0},
+              { letter: 'E', flipped: 0, matched: 0},
+              { letter: 'F', flipped: 0, matched: 0},
+              { letter: 'F', flipped: 0, matched: 0},
+              { letter: 'G', flipped: 0, matched: 0},
+              { letter: 'G', flipped: 0, matched: 0},
+              { letter: 'H', flipped: 0, matched: 0},
+              { letter: 'H', flipped: 0, matched: 0}];
     this.shuffle(tiles);
     return tiles;
   }
 
+  //  Everytime a tile is clicked, this function is called.
+  // If this is the second tile clicked (the previous tile in the this.state
+// is not NULL), then it will call the function determineMatch.
+// determineMatch is delayed so that both cards will expose the letters for
+// 1 second before hiding them if they both don't match.
   handleClick(i) {
     this.state.attempts++;
     let new_tiles = this.state.tiles;
@@ -63,10 +74,14 @@ shuffle(tiles) {
   }
 
   // determine if there is a match between two tiles clicked
+  // If there is not a match, the flipped parameter of both of the
+  // tiles goes back to false (0). If there is a match,
+  // both tiles remain flipped.
   determineMatch(currentTile) {
     let last_tile = this.state.last_tile;
     if (this.state.last_tile == null) {
       let new_state_1 = _.extend(this.state, {
+        tiles: this.state.tiles,
         last_tile: currentTile,
       });
       this.setState(new_state_1);
@@ -76,15 +91,21 @@ shuffle(tiles) {
         currentTile.flipped = 0;
         last_tile.flipped = 0;
       }
-      let new_state = {
+      else {
+        currentTile.matched = 1;
+        last_tile.matched = 1;
+      }
+      let new_state = _.extend(this.state, {
         tiles: this.state.tiles,
         last_tile : null
-      }
+      });
       this.setState(new_state);
     }
 
   }
 
+  // This function is called when the "Reset Game" button is clicked.
+  // It sets the state to it's initial_state
   resetGame() {
     let initial_state = {
       tiles : this.initalizeTiles(),
@@ -94,11 +115,13 @@ shuffle(tiles) {
     this.setState(initial_state);
   }
 
+  // Renders a Tile from the game's tiles given an index.
   renderTile(i) {
     let tile = this.state.tiles[i];
-    return (<Tile letter={tile.letter} flipped={tile.flipped} onClick={() => this.handleClick(i)}/>);
+    return (<Tile letter={tile.letter} matched={tile.matched} flipped={tile.flipped} onClick={() => this.handleClick(i)}/>);
   }
 
+  // Renders the entire game
   render() {
     return(
       <div>
@@ -136,9 +159,13 @@ shuffle(tiles) {
   }
 }
 
+// Represents a Tile
 function Tile(params) {
-  let tile_id = params.flipped ? "show" : "back-side";
-  let content = params.flipped ? params.letter : "?";
+  let flipped = params.flipped ? "show" : "back-side";
+  let tile_id = params.matched ? "match" : flipped;
+  // content before determining if an item was matched
+  let before_match = params.flipped ? params.letter : "?";
+  let content = params.matched ? "✔" : before_match;
   let click = params.flipped ? undefined : params.onClick;
       return (
         <a className="tile" id={tile_id} onClick={click}>
