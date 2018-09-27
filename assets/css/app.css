@@ -8,19 +8,27 @@
 }
 
 .tile {
-  margin: 30px 100px;
-  padding: 38px 30px;
+  margin: 20px 100px;
+  padding: 35px 30px;
 }
 
-/* #question-mark {
-  color: yellow;
-  weight: 600;
-} */
+#reset {
+  margin-left: 50px;
+}
+
+#score {
+  margin-left: 50px;
+}
 
 #show {
   background-color: #ecc9ff;
 }
 
+#tile-content {
+  font-weight: 700;
+  font-size: 18px;
+}
+
 #back-side {
-  background-color: gray;
+  background-color: #abb2bc;
 }

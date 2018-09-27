@@ -3,16 +3,16 @@ import ReactDOM from 'react-dom';
 import _ from 'lodash';
 
 export default function game_init(root) {
-  ReactDOM.render(<MatchingBoard />, root);
+  ReactDOM.render(<MatchingGame />, root);
 }
 
-class MatchingBoard extends React.Component {
+// Represents the entire game
+class MatchingGame extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      matches : 0,
       tiles : this.initalizeTiles(),
-      attempts: 0,
+      attempts: 0, // the number of times a user clicks
       last_tile: null // keeps track of the last tile clicked
     };
   }
@@ -50,13 +50,13 @@ shuffle(tiles) {
   }
 
   handleClick(i) {
+    this.state.attempts++;
     let new_tiles = this.state.tiles;
     new_tiles[i].flipped = 1;
     let new_state = _.extend(this.state, {
       tiles: new_tiles,
     });
     this.setState(new_state);
-    console.log(this.state.last_tile);
     setTimeout(function() {
       this.determineMatch(new_tiles[i])
     }.bind(this), 1000);
@@ -85,6 +85,14 @@ shuffle(tiles) {
 
   }
 
+  resetGame() {
+    let initial_state = {
+      tiles : this.initalizeTiles(),
+      attempts: 0,
+      last_tile: null
+    }
+    this.setState(initial_state);
+  }
 
   renderTile(i) {
     let tile = this.state.tiles[i];
@@ -94,8 +102,10 @@ shuffle(tiles) {
   render() {
     return(
       <div>
-        <div>
+        <div className="row">
           <h1>Memory Game</h1>
+          <button id="reset" onClick={() => this.resetGame()}>Reset Game</button>
+          <h4 id="score"> Score: {this.state.attempts} </h4>
         </div>
         <div className="row">
             {this.renderTile(0)}
@@ -129,10 +139,10 @@ shuffle(tiles) {
 function Tile(params) {
   let tile_id = params.flipped ? "show" : "back-side";
   let content = params.flipped ? params.letter : "?";
-  let click = params.flipped ? "" : params.onClick;
+  let click = params.flipped ? undefined : params.onClick;
       return (
         <a className="tile" id={tile_id} onClick={click}>
-          {content}
+          <p id="tile-content">{content}</p>
         </a>
       );
 }
