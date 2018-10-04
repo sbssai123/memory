@@ -1,3 +1,5 @@
+# This file was based heavily on the game_channel.ex game in the hangman
+# we did in class.
 defmodule MemoryWeb.GamesChannel do
   use MemoryWeb, :channel
 

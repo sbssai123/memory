@@ -1,3 +1,5 @@
+# This file was used from the Hangman example in class:
+# https://github.com/NatTuck/hangman/blob/8888bba5c6a9850191ef4957211aba43c158780b/lib/hangman/backup_agent.ex
 defmodule Memory.BackupAgent do
   use Agent
 
