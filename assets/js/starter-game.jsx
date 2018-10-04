@@ -2,123 +2,44 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
 
-export default function game_init(root) {
-  ReactDOM.render(<MatchingGame />, root);
+export default function game_init(root, channel) {
+  ReactDOM.render(<MatchingGame channel={channel} />, root);
 }
 
 // Represents the entire game
 class MatchingGame extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      tiles : this.initalizeTiles(),
-      attempts: 0, // the number of times a user clicks
-      last_tile: null // keeps track of the last tile clicked
-    };
+    this.channel = props.channel;
+    this.state = { tiles: [], attempts: 0, current_tiles: [], matched: [] };
+    this.channel.join()
+        .receive("ok", this.gotView.bind(this))
+        .receive("error", resp => { console.log("Unable to join", resp) });
   }
 
-// When given a list of tiles, randomly shuffles them.
-// Shuffling function was based off of this tutorial:
-// https://www.kirupa.com/html5/shuffling_array_js.htm
-shuffle(tiles) {
-    for (let i = tiles.length - 1; i>=0; i--) {
-      let random_index = Math.floor(Math.random() * (i + 1));
-      let item = tiles[random_index];
-      tiles[random_index] = tiles[i];
-      tiles[i] = item;
-    }
+  gotView(view) {
+    console.log("new view", view);
+    this.setState(view.game);
   }
 
-  // shuffle tiles at the start of the game
-  // A tile is a dictionary that contains information about the letter and
-  // whether it should be flipped at the current instance of the game,
-  // exposing the letter
-  initalizeTiles() {
-    let tiles = [
-              { letter: 'A', flipped: 0, matched: 0},
-              { letter: 'A', flipped: 0, matched: 0},
-              { letter: 'B', flipped: 0, matched: 0},
-              { letter: 'B', flipped: 0, matched: 0},
-              { letter: 'C', flipped: 0, matched: 0},
-              { letter: 'C', flipped: 0, matched: 0},
-              { letter: 'D', flipped: 0, matched: 0},
-              { letter: 'D', flipped: 0, matched: 0},
-              { letter: 'E', flipped: 0, matched: 0},
-              { letter: 'E', flipped: 0, matched: 0},
-              { letter: 'F', flipped: 0, matched: 0},
-              { letter: 'F', flipped: 0, matched: 0},
-              { letter: 'G', flipped: 0, matched: 0},
-              { letter: 'G', flipped: 0, matched: 0},
-              { letter: 'H', flipped: 0, matched: 0},
-              { letter: 'H', flipped: 0, matched: 0}];
-    this.shuffle(tiles);
-    return tiles;
-  }
-
-  //  Everytime a tile is clicked, this function is called.
-  // If this is the second tile clicked (the previous tile in the this.state
-// is not NULL), then it will call the function determineMatch.
-// determineMatch is delayed so that both cards will expose the letters for
-// 1 second before hiding them if they both don't match.
   handleClick(i) {
-    this.state.attempts++;
-    let new_tiles = this.state.tiles;
-    new_tiles[i].flipped = 1;
-    let new_state = _.extend(this.state, {
-      tiles: new_tiles,
-    });
-    this.setState(new_state);
-    setTimeout(function() {
-      this.determineMatch(new_tiles[i])
-    }.bind(this), 1000);
+    this.channel.push("click", { tile_index: i })
+    .receive("ok", this.gotView.bind(this));
+    setTimeout(function(){
+    this.channel.push("match", { tile_index: i })
+    .receive("ok", this.gotView.bind(this))}.bind(this), 1000);
   }
 
-  // determine if there is a match between two tiles clicked
-  // If there is not a match, the flipped parameter of both of the
-  // tiles goes back to false (0). If there is a match,
-  // both tiles remain flipped.
-  determineMatch(currentTile) {
-    let last_tile = this.state.last_tile;
-    if (this.state.last_tile == null) {
-      let new_state_1 = _.extend(this.state, {
-        tiles: this.state.tiles,
-        last_tile: currentTile,
-      });
-      this.setState(new_state_1);
-    }
-    else {
-      if (currentTile.letter != last_tile.letter) {
-        currentTile.flipped = 0;
-        last_tile.flipped = 0;
-      }
-      else {
-        currentTile.matched = 1;
-        last_tile.matched = 1;
-      }
-      let new_state = _.extend(this.state, {
-        tiles: this.state.tiles,
-        last_tile : null
-      });
-      this.setState(new_state);
-    }
-
-  }
-
-  // This function is called when the "Reset Game" button is clicked.
-  // It sets the state to it's initial_state
-  resetGame() {
-    let initial_state = {
-      tiles : this.initalizeTiles(),
-      attempts: 0,
-      last_tile: null
-    }
-    this.setState(initial_state);
+  reset() {
+    this.channel.push("reset", { filler: 1 }).receive("ok", this.gotView.bind(this));
   }
 
   // Renders a Tile from the game's tiles given an index.
   renderTile(i) {
-    let tile = this.state.tiles[i];
-    return (<Tile letter={tile.letter} matched={tile.matched} flipped={tile.flipped} onClick={() => this.handleClick(i)}/>);
+    let letter = this.state.tiles[i];
+    let flipped = this.state.current_tiles.includes(i);
+    let matched = this.state.matched.includes(i);
+    return letter ? (<Tile flipped={flipped} letter={letter} matched={matched} onClick={() => this.handleClick(i)}/>) : <div/>;
   }
 
   // Renders the entire game
@@ -126,8 +47,7 @@ shuffle(tiles) {
     return(
       <div>
         <div className="row">
-          <h1>Memory Game</h1>
-          <button id="reset" onClick={() => this.resetGame()}>Reset Game</button>
+          <button id="reset" onClick={() => this.reset()}>Reset Game</button>
           <h4 id="score"> Score: {this.state.attempts} </h4>
         </div>
         <div className="row">
