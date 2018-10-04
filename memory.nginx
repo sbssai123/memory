@@ -2,7 +2,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    server_name memory1.sreeyasai.info;
+    server_name hw04.sreeyasai.info;
 
     location / {
         proxy_pass http://localhost:4791;
