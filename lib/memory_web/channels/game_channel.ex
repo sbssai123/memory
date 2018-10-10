@@ -17,7 +17,12 @@ defmodule MemoryWeb.GamesChannel do
   end
 
   def handle_in("click", %{"tile_index" => i}, socket) do
-    view = GameServer.click(socket.assigns[:game], socket.assigns[:user], ll)
+    view = GameServer.click(socket.assigns[:game], socket.assigns[:user], i)
+    {:reply, {:ok, %{ "game" => view}}, socket}
+  end
+
+  def handle_in("match", %{"tile_index" => i}, socket) do
+    view = GameServer.match(socket.assigns[:game], socket.assigns[:user], i)
     {:reply, {:ok, %{ "game" => view}}, socket}
   end
 

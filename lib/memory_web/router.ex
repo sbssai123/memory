@@ -21,7 +21,7 @@ defmodule MemoryWeb.Router do
 
     post "/join", PageController, :join
 
-    # get "/game/:game", PageController, :game
+    get "/game/:game", PageController, :game
 
   end
 
