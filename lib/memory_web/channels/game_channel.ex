@@ -9,6 +9,7 @@ defmodule MemoryWeb.GamesChannel do
   def join("games:" <> game, payload, socket) do
     if authorized?(payload) do
       socket = assign(socket, :game, game)
+      GameServer.add_user(game, socket.assigns[:user])
       view = GameServer.view(game, socket.assigns[:user])
       {:ok, %{"join" => game, "game" => view}, socket}
     else
@@ -26,7 +27,10 @@ defmodule MemoryWeb.GamesChannel do
     {:reply, {:ok, %{ "game" => view}}, socket}
   end
 
-  # def handle_in("new_player")
+  # def handle_in("new_player", _, socket) do
+  #   view = GameServer.new_player(socket.assigns[:game], socket.assigns[:user])
+  #   {:reply, {:ok, %{ "game" => view}}, socket}
+  # end
 
   # def handle_in("match", %{"tile_index" => i}, socket) do
   #   name = socket.assigns[:name]

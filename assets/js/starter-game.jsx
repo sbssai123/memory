@@ -15,8 +15,8 @@ class MatchingGame extends React.Component {
     this.channel.join()
         .receive("ok", this.gotView.bind(this))
         .receive("error", resp => { console.log("Unable to join", resp) });
-    // handle a new player    
-    this.channel.push("new_player");
+    // handle a new player
+    // this.channel.push("new_player");
   }
 
   gotView(view) {

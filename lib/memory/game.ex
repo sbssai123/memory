@@ -4,7 +4,7 @@ defmodule Memory.Game do
       tiles: initalizeTiles(),
       current_tiles: [],
       matched: [],
-      players: %{},
+      players: [],
       }
   end
 
@@ -18,21 +18,19 @@ defmodule Memory.Game do
 
   def default_player() do
     %{
+      name: "",
       matches: 0, # of tiles matched
-      turn: 0, # ability to control the board
+      turn: -1, # it's there turn
     }
   end
 
 
   def client_view(game, user) do
-    ps = Enum.map game.players, fn {pn, pi} ->
-      %{ name: pn, matches: Enum.into(pi.matches, 0) }
-    end
     %{
       tiles: game.tiles,
       current_tiles: game.current_tiles,
       matched: game.matched,
-      players: ps,
+      players: game.players,
     }
   end
 
@@ -41,17 +39,22 @@ defmodule Memory.Game do
     Enum.shuffle(tiles)
   end
 
+  def add_player(game, player) do
+    # if length(game.players) < 2 do
+    new_player = default_player()
+    |> Map.put(:name, player)
+    players = game.players ++ [new_player]
+    Map.put(game, :players, players)
+    # else
+    #
+    #   Map.put(game, :players, players)
+    # end
+  end
+
+
   def flip_tile(game, player, tile_index) do
       new_tiles = game.current_tiles ++ [tile_index]
       Map.put(game, :current_tiles, new_tiles)
-        # first = Enum.at(game.current_tiles, 0)
-        # # compare the tiles at the two indices
-        # # :timer.sleep(1000)
-        # compare_tiles(game, player, first, tile_index)
-      # true ->
-      #   new_tiles = game.current_tiles ++ [tile_index]
-      #   Map.put(game, :current_tiles, new_tiles)
-    # end
   end
 
   def compare_tiles(game, player, tile2) do
@@ -76,21 +79,3 @@ defmodule Memory.Game do
     end
   end
 end
-
-  # Determine if the tile should be matched
-#   def determine_match(game, tile_index) do
-#     if game.last_tile != NULL do
-#       first = Enum.at(game.tiles, Enum.at(game.current_tiles, 0))
-#       second = Enum.at(game.tiles, Enum.at(game.current_tiles, 1))
-#       if first == second do
-#         matches = game.matched ++ game.current_tiles
-#         Map.put(game, :matched, matches)
-#         |> Map.put(:current_tiles, [])
-#       else
-#         Map.put(game, :current_tiles, [])
-#         |> Map.put(:last_tile, NULL)
-#       end
-#     else
-#       Map.put(game, :last_tile, tile_index)
-#     end
-#   end

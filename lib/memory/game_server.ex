@@ -20,6 +20,10 @@ defmodule Memory.GameServer do
     GenServer.call(__MODULE__, {:match, game, user, tile})
   end
 
+  def add_user(game, user) do
+    GenServer.call(__MODULE__, {:new_player, game, user})
+  end
+
   ## Implementations
   def init(state) do
     {:ok, state}
@@ -40,6 +44,13 @@ defmodule Memory.GameServer do
   def handle_call({:match, game, user, tile}, _from, state) do
     gg = Map.get(state, game, Game.new)
     |> Game.compare_tiles(user, tile)
+    vv = Game.client_view(gg, user)
+    {:reply, vv, Map.put(state, game, gg)}
+  end
+
+  def handle_call({:new_player, game, user}, _from, state) do
+    gg = Map.get(state, game, Game.new)
+    |> Game.add_player(user)
     vv = Game.client_view(gg, user)
     {:reply, vv, Map.put(state, game, gg)}
   end
