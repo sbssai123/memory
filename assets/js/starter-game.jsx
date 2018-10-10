@@ -25,9 +25,9 @@ class MatchingGame extends React.Component {
   handleClick(i) {
     this.channel.push("click", { tile_index: i })
     .receive("ok", this.gotView.bind(this));
-    setTimeout(function(){
-    this.channel.push("match", { tile_index: i })
-    .receive("ok", this.gotView.bind(this))}.bind(this), 1000);
+    // setTimeout(function(){
+    // this.channel.push("match", { tile_index: i })
+    // .receive("ok", this.gotView.bind(this))}.bind(this), 1000);
   }
 
   reset() {
