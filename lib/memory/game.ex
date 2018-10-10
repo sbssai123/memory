@@ -19,6 +19,7 @@ defmodule Memory.Game do
   def default_player() do
     %{
       matches: 0, # of tiles matched
+      turn: 0, # ability to control the board
     }
   end
 
@@ -40,18 +41,6 @@ defmodule Memory.Game do
     Enum.shuffle(tiles)
   end
 
-  # def get_cd(game, user) do
-  #   done = (get_in(game.players, [user, :cooldown]) || 0)
-  #   left = done - :os.system_time(:milli_seconds)
-  #   max(left, 0)
-  # end
-
-  # def flip_tile(game, player, tile_index) do
-  #   new_tiles = game.current_tiles ++ [tile_index]
-  #   Map.put(game, :current_tiles, new_tiles)
-  #   |> Map.put(:attempts, game.attempts+1)
-  # end
-
   def flip_tile(game, player, tile_index) do
       new_tiles = game.current_tiles ++ [tile_index]
       Map.put(game, :current_tiles, new_tiles)
@@ -71,7 +60,9 @@ defmodule Memory.Game do
     second_tile = Enum.at(game.tiles, tile2)
     if first_tile == second_tile do
       matched = game.matched ++ game.current_tiles
-
+      # player_score = player.matches + 1
+      # pinfo = Map.get(game, player, default_player())
+      # Map.put(player, :matches, player_score)
       # player_score = player.matches + 1
       # pinfo = Map.get(game, player, default_player())
       # |> Map.put(:matches, player_score)

@@ -26,6 +26,8 @@ defmodule MemoryWeb.GamesChannel do
     {:reply, {:ok, %{ "game" => view}}, socket}
   end
 
+  # def handle_in("new_player")
+
   # def handle_in("match", %{"tile_index" => i}, socket) do
   #   name = socket.assigns[:name]
   #   game = Game.determine_match(socket.assigns[:game], i)
