@@ -11,7 +11,7 @@ class MatchingGame extends React.Component {
   constructor(props) {
     super(props);
     this.channel = props.channel;
-    this.state = { tiles: [], current_tiles: [], matched: [], players: [] };
+    this.state = { tiles: [], current_tiles: [], matched: [], players: [], winner: "" };
     this.channel.join()
         .receive("ok", this.gotView.bind(this))
         .receive("error", resp => { console.log("Unable to join", resp) });
@@ -51,6 +51,12 @@ class MatchingGame extends React.Component {
     return letter ? (<Tile flipped={flipped} letter={letter} matched={matched} onClick={() => this.handleClick(i)}/>) : <div/>;
   }
 
+  renderWinner() {
+    if (this.state.winner) {
+      return (<h3> Winner: {this.state.winner} </h3>)
+    }
+  }
+
   // Renders the entire game
   render() {
     return(
@@ -58,6 +64,7 @@ class MatchingGame extends React.Component {
         <div className="row">
           <button id="reset" onClick={() => this.reset()}>Reset Game</button>
         </div>
+        <div>{this.renderWinner()}</div>
         <div className="row">
             {this.renderTile(0)}
             {this.renderTile(1)}

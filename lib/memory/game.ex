@@ -6,6 +6,7 @@ defmodule Memory.Game do
       matched: [],
       players: %{},
       next_player: "",
+      winner: "",
       }
   end
 
@@ -29,12 +30,19 @@ defmodule Memory.Game do
       current_tiles: game.current_tiles,
       matched: game.matched,
       players: game.players,
+      winner: game.winner,
     }
   end
 
   def initalizeTiles() do
     tiles = String.graphemes("AABBCCDDEEFFGGHH")
     Enum.shuffle(tiles)
+  end
+
+  def reset(game) do
+    new()
+    |> Map.put(:players, game.players)
+    |> Map.put(:next_player, game.next_player)
   end
 
   def add_player(game, player) do
@@ -86,18 +94,30 @@ defmodule Memory.Game do
     second_tile = Enum.at(game.tiles, tile2)
     if first_tile == second_tile do
       pinfo = Map.get(game.players, player)
+      new_score = Map.get(pinfo, :matches) + 1
       new_pinfo = change_player(pinfo)
+      |> Map.put(:matches, new_score)
       next_pinfo = Map.get(game.players, game.next_player)
       new_next_pinfo = change_player(next_pinfo)
       players = game.players
       |> Map.put(player, new_pinfo)
       |> Map.put(game.next_player, new_next_pinfo)
       matched = game.matched ++ game.current_tiles
-      game
-      |> Map.put(:matched, matched)
-      |> Map.put(:players, players)
-      |> Map.put(:current_tiles, [])
-      |> Map.put(:next_player, player)
+      if length(matched) == 16 do
+        winner = determine_winner(game, player, new_score)
+        game
+        |> Map.put(:winner, winner)
+        |> Map.put(:matched, matched)
+        |> Map.put(:players, players)
+        |> Map.put(:current_tiles, [])
+        |> Map.put(:next_player, player)
+      else
+        game
+        |> Map.put(:matched, matched)
+        |> Map.put(:players, players)
+        |> Map.put(:current_tiles, [])
+        |> Map.put(:next_player, player)
+      end
     else
       pinfo = Map.get(game.players, player)
       new_pinfo = change_player(pinfo)
@@ -113,7 +133,21 @@ defmodule Memory.Game do
     end
   end
 
-# return updated list of players
+# determine winner
+  def determine_winner(game, player, score1) do
+    pinfo_player_other = Map.get(game.players, game.next_player)
+    score2 = Map.get(pinfo_player_other, :matches)
+    cond do
+      score1 > score2 ->
+        player
+      score2 > score1 ->
+        game.next_player
+      true ->
+        "draw"
+    end
+  end
+
+  # return updated list of players
   def change_player(pinfo) do
     turn = Map.get(pinfo, :turn)
     cond do

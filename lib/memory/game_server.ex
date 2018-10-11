@@ -24,6 +24,10 @@ defmodule Memory.GameServer do
     GenServer.call(__MODULE__, {:new_player, game, user})
   end
 
+  def reset(game, user) do
+    GenServer.call(__MODULE__, {:reset, game, user})
+  end
+
   ## Implementations
   def init(state) do
     {:ok, state}
@@ -52,6 +56,14 @@ defmodule Memory.GameServer do
   def handle_call({:new_player, game, user}, _from, state) do
     gg = Map.get(state, game, Game.new)
     |> Game.add_player(user)
+    vv = Game.client_view(gg, user)
+    MemoryWeb.Endpoint.broadcast("games:" <> game, "change_view", vv)
+    {:reply, vv, Map.put(state, game, gg)}
+  end
+
+  def handle_call({:reset, game, user}, _from, state) do
+    gg = Map.get(state, game, Game.new)
+    |> Game.reset()
     vv = Game.client_view(gg, user)
     MemoryWeb.Endpoint.broadcast("games:" <> game, "change_view", vv)
     {:reply, vv, Map.put(state, game, gg)}
