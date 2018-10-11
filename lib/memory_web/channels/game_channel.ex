@@ -19,34 +19,15 @@ defmodule MemoryWeb.GamesChannel do
 
   def handle_in("click", %{"tile_index" => i}, socket) do
     view = GameServer.click(socket.assigns[:game], socket.assigns[:user], i)
+    broadcast(socket, "change_view", view)
     {:reply, {:ok, %{ "game" => view}}, socket}
   end
 
   def handle_in("match", %{"tile_index" => i}, socket) do
     view = GameServer.match(socket.assigns[:game], socket.assigns[:user], i)
+    broadcast(socket, "change_view", view)
     {:reply, {:ok, %{ "game" => view}}, socket}
   end
-
-  # def handle_in("new_player", _, socket) do
-  #   view = GameServer.new_player(socket.assigns[:game], socket.assigns[:user])
-  #   {:reply, {:ok, %{ "game" => view}}, socket}
-  # end
-
-  # def handle_in("match", %{"tile_index" => i}, socket) do
-  #   name = socket.assigns[:name]
-  #   game = Game.determine_match(socket.assigns[:game], i)
-  #   socket = assign(socket, :game, game)
-  #   BackupAgent.put(name, game)
-  #   {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
-  # end
-  #
-  # def handle_in("reset", %{"filler" => i}, socket) do
-  #     name = socket.assigns[:name]
-  #     game = Game.new()
-  #     socket = assign(socket, :game, game)
-  #     BackupAgent.put(name, game)
-  #     {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
-  #   end
 
   # Add authorization logic here as required.
   defp authorized?(_payload) do

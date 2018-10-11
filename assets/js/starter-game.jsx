@@ -11,12 +11,16 @@ class MatchingGame extends React.Component {
   constructor(props) {
     super(props);
     this.channel = props.channel;
-    this.state = { tiles: [], current_tiles: [], matched: [], players: [] };
+    this.state = { tiles: [], current_tiles: [], matched: [], players: [], observers: [] };
     this.channel.join()
         .receive("ok", this.gotView.bind(this))
         .receive("error", resp => { console.log("Unable to join", resp) });
-    // handle a new player
-    // this.channel.push("new_player");
+
+    this.channel.on("change_view", (state) => {
+       if (state !== undefined) {
+           this.setState(state);
+       }
+     });
   }
 
   gotView(view) {
@@ -32,9 +36,6 @@ class MatchingGame extends React.Component {
       this.channel.push("match", {tile_index: i})
       .receive("ok", this.gotView.bind(this));
     }
-    // setTimeout(function(){
-    // this.channel.push("match", { tile_index: i })
-    // .receive("ok", this.gotView.bind(this))}.bind(this), 1000);
   }
 
 

@@ -5,6 +5,7 @@ defmodule Memory.Game do
       current_tiles: [],
       matched: [],
       players: [],
+      observers: [],
       }
   end
 
@@ -20,7 +21,7 @@ defmodule Memory.Game do
     %{
       name: "",
       matches: 0, # of tiles matched
-      turn: -1, # it's there turn
+      turn: -1, # 1 is there turn and -1 mean they are a watcher
     }
   end
 
@@ -31,6 +32,7 @@ defmodule Memory.Game do
       current_tiles: game.current_tiles,
       matched: game.matched,
       players: game.players,
+      observers: game.observers,
     }
   end
 
@@ -40,13 +42,39 @@ defmodule Memory.Game do
   end
 
   def add_player(game, player) do
-    # if length(game.players) < 2 do
-    new_player = default_player()
-    |> Map.put(:name, player)
-    players = game.players ++ [new_player]
-    Map.put(game, :players, players)
+    cond do
+      length(game.players) == 0 ->
+        new_player = default_player()
+        |> Map.put(:name, player)
+        |> Map.put(:turn, 1)
+        players = game.players ++ [new_player]
+        Map.put(game, :players, players)
+      length(game.players) == 1 ->
+        # update first player
+        # players = Enum.at(game.players, 0)
+        # |> Map.update(%{turn: 0}, :turn, &(&1 + 1))
+        # Map.put(game, :players, players)
+        new_player = default_player()
+        |> Map.put(:name, player)
+        |> Map.put(:turn, 0)
+        players = game.players ++ [new_player]
+        Map.put(game, :players, players)
+      true ->
+        new_player = default_player()
+        |> Map.put(:name, player)
+        observers = game.observers ++ [new_player]
+        Map.put(game, :observers, observers)
+    end
+    # if length(game.players) == 0 do
+    #   new_player = default_player()
+    #   |> Map.put(:name, player)
+    #   players = game.players ++ [new_player]
+    #   Map.put(game, :players, players)
     # else
-    #
+    #   new_player = default_player()
+    #   |> Map.put(:name, player)
+    #   |> Map.put(:turn, -1)
+    #   players = game.players ++ [new_player]
     #   Map.put(game, :players, players)
     # end
   end
@@ -78,4 +106,9 @@ defmodule Memory.Game do
       Map.put(game, :current_tiles, [])
     end
   end
+
+  # Return the player who's turn it is
+  # def player_turn do
+  #   game.players
+  # end
 end
