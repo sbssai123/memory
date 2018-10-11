@@ -11,7 +11,7 @@ class MatchingGame extends React.Component {
   constructor(props) {
     super(props);
     this.channel = props.channel;
-    this.state = { tiles: [], current_tiles: [], matched: [], players: [], observers: [] };
+    this.state = { tiles: [], current_tiles: [], matched: [], players: [] };
     this.channel.join()
         .receive("ok", this.gotView.bind(this))
         .receive("error", resp => { console.log("Unable to join", resp) });

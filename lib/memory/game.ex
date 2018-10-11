@@ -4,8 +4,7 @@ defmodule Memory.Game do
       tiles: initalizeTiles(),
       current_tiles: [],
       matched: [],
-      players: [],
-      observers: [],
+      players: %{},
       }
   end
 
@@ -19,7 +18,6 @@ defmodule Memory.Game do
 
   def default_player() do
     %{
-      name: "",
       matches: 0, # of tiles matched
       turn: -1, # 1 is there turn and -1 mean they are a watcher
     }
@@ -32,7 +30,6 @@ defmodule Memory.Game do
       current_tiles: game.current_tiles,
       matched: game.matched,
       players: game.players,
-      observers: game.observers,
     }
   end
 
@@ -42,47 +39,42 @@ defmodule Memory.Game do
   end
 
   def add_player(game, player) do
+    keys = Map.keys(game.players)
     cond do
-      length(game.players) == 0 ->
-        new_player = default_player()
-        |> Map.put(:name, player)
+      length(keys) == 0 ->
+        pinfo = default_player()
         |> Map.put(:turn, 1)
-        players = game.players ++ [new_player]
-        Map.put(game, :players, players)
-      length(game.players) == 1 ->
-        # update first player
-        # players = Enum.at(game.players, 0)
-        # |> Map.update(%{turn: 0}, :turn, &(&1 + 1))
-        # Map.put(game, :players, players)
-        new_player = default_player()
-        |> Map.put(:name, player)
+        players = Map.put(game.players, player, pinfo)
+        game
+        |> Map.put(:players, players)
+        # |> Map.put(:current_player, player)
+      length(keys) == 1 ->
+        pinfo = default_player()
         |> Map.put(:turn, 0)
-        players = game.players ++ [new_player]
+        players = Map.put(game.players, player, pinfo)
         Map.put(game, :players, players)
       true ->
-        new_player = default_player()
-        |> Map.put(:name, player)
-        observers = game.observers ++ [new_player]
-        Map.put(game, :observers, observers)
+        pinfo = default_player()
+        players = Map.put(game.players, player, pinfo)
+        Map.put(game, :players, players)
     end
-    # if length(game.players) == 0 do
-    #   new_player = default_player()
-    #   |> Map.put(:name, player)
-    #   players = game.players ++ [new_player]
-    #   Map.put(game, :players, players)
-    # else
-    #   new_player = default_player()
-    #   |> Map.put(:name, player)
-    #   |> Map.put(:turn, -1)
-    #   players = game.players ++ [new_player]
-    #   Map.put(game, :players, players)
-    # end
+  end
+
+  def not_playing(game, player) do
+    keys = Map.keys(game.players)
+    turn = Map.get(game.players, player)
+    |> Map.get(:turn)
+    turn == 0 || turn == -1 || length(keys) < 2
   end
 
 
   def flip_tile(game, player, tile_index) do
+    if not_playing(game, player) do
+      game
+    else
       new_tiles = game.current_tiles ++ [tile_index]
       Map.put(game, :current_tiles, new_tiles)
+    end
   end
 
   def compare_tiles(game, player, tile2) do
@@ -90,25 +82,35 @@ defmodule Memory.Game do
     first_tile = Enum.at(game.tiles, Enum.at(game.current_tiles, 0))
     second_tile = Enum.at(game.tiles, tile2)
     if first_tile == second_tile do
+      pinfo = Map.get(game.players, player)
+      new_pinfo = change_player(pinfo)
+      players = Map.put(game.players, player, new_pinfo)
       matched = game.matched ++ game.current_tiles
-      # player_score = player.matches + 1
-      # pinfo = Map.get(game, player, default_player())
-      # Map.put(player, :matches, player_score)
-      # player_score = player.matches + 1
-      # pinfo = Map.get(game, player, default_player())
-      # |> Map.put(:matches, player_score)
-
       game
       |> Map.put(:matched, matched)
-      # |> Map.update(:players, %{}, &(Map.put(&1, player, pinfo)))
+      |> Map.put(:players, players)
       |> Map.put(:current_tiles, [])
     else
-      Map.put(game, :current_tiles, [])
+      pinfo = Map.get(game.players, player)
+      new_pinfo = change_player(pinfo)
+      players = Map.put(game.players, player, new_pinfo)
+      game
+      |> Map.put(:current_tiles, [])
+      |> Map.put(:players, players)
     end
   end
 
-  # Return the player who's turn it is
-  # def player_turn do
-  #   game.players
-  # end
+# return updated list of players
+  def change_player(pinfo) do
+    turn = Map.get(pinfo, :turn)
+    cond do
+      turn == 0 ->
+        Map.put(pinfo, :turn, 1)
+      turn == 1 ->
+        Map.put(pinfo, :turn, 0)
+      true ->
+        Map.put(pinfo, :turn, -1)
+    end
+  end
+
 end

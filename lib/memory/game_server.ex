@@ -53,6 +53,7 @@ defmodule Memory.GameServer do
     gg = Map.get(state, game, Game.new)
     |> Game.add_player(user)
     vv = Game.client_view(gg, user)
+    MemoryWeb.Endpoint.broadcast("games:" <> game, "change_view", vv)
     {:reply, vv, Map.put(state, game, gg)}
   end
 
