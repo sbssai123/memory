@@ -39,9 +39,16 @@ defmodule Memory.Game do
     Enum.shuffle(tiles)
   end
 
-  def reset(game) do
+  def reset(game, player) do
+    new_p1 = Map.get(game.players, player)
+    |> Map.put(:matches, 0)
+    new_p2 = Map.get(game.players, game.next_player)
+    |> Map.put(:matches, 0)
+    players = game.players
+    |> Map.put(player, new_p1)
+    |> Map.put(game.next_player, new_p2)
     new()
-    |> Map.put(:players, game.players)
+    |> Map.put(:players, players)
     |> Map.put(:next_player, game.next_player)
   end
 
