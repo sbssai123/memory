@@ -63,11 +63,30 @@ class MatchingGame extends React.Component {
       for (let i = 0; i < keys.length; i++) {
         let key = keys[i];
         let score = players[key].matches;
-        let temp = (<span>{key} : {score} </span>);
-        spans.push(temp);
+        let turn = players[key].turn;
+        if (turn != -1) {
+          let temp = (<span>{key} : {score} </span>);
+          spans.push(temp);
+        }
       }
     }
     return (<div>Scores: {spans}</div>)
+  }
+
+  renderTurn() {
+    let players = this.state.players;
+    if (players) {
+      let keys = Object.keys(players);
+      if (keys.length > 1) {
+        for (let i = 0; i < keys.length; i++) {
+          let key = keys[i];
+          let turn = players[key].turn;
+          if (turn == 1) {
+            return(<span>Current Turn: {key}</span>)
+          }
+        }
+      }
+    }
   }
 
   renderWinner() {
@@ -83,6 +102,7 @@ class MatchingGame extends React.Component {
         <div className="row">
           <button id="reset" onClick={() => this.reset()}>Reset Game</button>
           <div id="scores">{this.renderScores()}</div>
+          <div id="turn"> {this.renderTurn()}</div>
           <div id="winner">{this.renderWinner()}</div>
         </div>
         <div className="row">

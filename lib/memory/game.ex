@@ -159,5 +159,4 @@ defmodule Memory.Game do
         Map.put(pinfo, :turn, -1)
     end
   end
-
 end
