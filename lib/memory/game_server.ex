@@ -63,7 +63,7 @@ defmodule Memory.GameServer do
 
   def handle_call({:reset, game, user}, _from, state) do
     gg = Map.get(state, game, Game.new)
-    |> Game.reset()
+    |> Game.reset(user)
     vv = Game.client_view(gg, user)
     MemoryWeb.Endpoint.broadcast("games:" <> game, "change_view", vv)
     {:reply, vv, Map.put(state, game, gg)}
