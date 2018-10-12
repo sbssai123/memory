@@ -40,16 +40,20 @@ defmodule Memory.Game do
   end
 
   def reset(game, player) do
-    new_p1 = Map.get(game.players, player)
-    |> Map.put(:matches, 0)
-    new_p2 = Map.get(game.players, game.next_player)
-    |> Map.put(:matches, 0)
-    players = game.players
-    |> Map.put(player, new_p1)
-    |> Map.put(game.next_player, new_p2)
-    new()
-    |> Map.put(:players, players)
-    |> Map.put(:next_player, game.next_player)
+    if observer(game, player) do
+      game
+    else
+      new_p1 = Map.get(game.players, player)
+      |> Map.put(:matches, 0)
+      new_p2 = Map.get(game.players, game.next_player)
+      |> Map.put(:matches, 0)
+      players = game.players
+      |> Map.put(player, new_p1)
+      |> Map.put(game.next_player, new_p2)
+      new()
+      |> Map.put(:players, players)
+      |> Map.put(:next_player, game.next_player)
+    end
   end
 
   def add_player(game, player) do
@@ -77,6 +81,13 @@ defmodule Memory.Game do
           Map.put(game, :players, players)
       end
     end
+  end
+
+  def observer(game, player) do
+    keys = Map.keys(game.players)
+    turn = Map.get(game.players, player)
+    |> Map.get(:turn)
+    turn == -1
   end
 
   def not_playing(game, player) do
