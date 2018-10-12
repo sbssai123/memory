@@ -51,27 +51,30 @@ class MatchingGame extends React.Component {
     return letter ? (<Tile flipped={flipped} letter={letter} matched={matched} onClick={() => this.handleClick(i)}/>) : <div/>;
   }
 
-  renderWinner() {
-    if (this.state.winner) {
-      return (<h3> Winner: {this.state.winner} </h3>)
-    }
-  }
-
   renderScores() {
     let players = this.state.players;
+    let spans = [];
+
     if (players) {
       let keys = Object.keys(players);
+      if (keys.length < 2) {
+        return(<span>Waiting for another player...</span>)
+      }
       for (let i = 0; i < keys.length; i++) {
         let key = keys[i];
-        let score = players[key].matches
-        this.renderScore(key, score)
+        let score = players[key].matches;
+        let temp = (<span>{key} : {score} </span>);
+        spans.push(temp);
       }
     }
+    return (<div>Scores: {spans}</div>)
   }
 
-  renderScore(key, score) {
-    return(<div>{key} : {score}</div>)
+  renderWinner() {
+  if (this.state.winner) {
+    return (<h5> Winner: {this.state.winner} </h5>)
   }
+}
 
   // Renders the entire game
   render() {
@@ -79,9 +82,9 @@ class MatchingGame extends React.Component {
       <div>
         <div className="row">
           <button id="reset" onClick={() => this.reset()}>Reset Game</button>
+          <div id="scores">{this.renderScores()}</div>
+          <div id="winner">{this.renderWinner()}</div>
         </div>
-        <div>{this.renderWinner()}</div>
-        <div>{this.renderScores()}</div>
         <div className="row">
             {this.renderTile(0)}
             {this.renderTile(1)}
