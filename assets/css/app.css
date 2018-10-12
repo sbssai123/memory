@@ -36,3 +36,15 @@
 #back-side {
   background-color: #abb2bc;
 }
+
+#scores {
+  margin-left: 5%;
+}
+
+#winner {
+  margin-left: 5%;
+}
+
+#turn {
+  margin-left: 5%;
+}

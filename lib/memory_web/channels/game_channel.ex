@@ -4,44 +4,36 @@ defmodule MemoryWeb.GamesChannel do
   use MemoryWeb, :channel
 
   alias Memory.Game
-  alias Memory.BackupAgent
+  alias Memory.GameServer
 
-  def join("games:" <> name, payload, socket) do
+  def join("games:" <> game, payload, socket) do
     if authorized?(payload) do
-      game = BackupAgent.get(name) || Game.new()
-      socket = socket
-      |> assign(:game, game)
-      |> assign(:name, name)
-      BackupAgent.put(name, game)
-      {:ok, %{"join" => name, "game" => Game.client_view(game)}, socket}
+      socket = assign(socket, :game, game)
+      GameServer.add_user(game, socket.assigns[:user])
+      view = GameServer.view(game, socket.assigns[:user])
+      {:ok, %{"join" => game, "game" => view}, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
   end
 
   def handle_in("click", %{"tile_index" => i}, socket) do
-    name = socket.assigns[:name]
-    game = Game.flip_tile(socket.assigns[:game], i)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(name, game)
-    {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
+    view = GameServer.click(socket.assigns[:game], socket.assigns[:user], i)
+    broadcast(socket, "change_view", view)
+    {:reply, {:ok, %{ "game" => view}}, socket}
   end
 
   def handle_in("match", %{"tile_index" => i}, socket) do
-    name = socket.assigns[:name]
-    game = Game.determine_match(socket.assigns[:game], i)
-    socket = assign(socket, :game, game)
-    BackupAgent.put(name, game)
-    {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
+    view = GameServer.match(socket.assigns[:game], socket.assigns[:user], i)
+    broadcast(socket, "change_view", view)
+    {:reply, {:ok, %{ "game" => view}}, socket}
   end
 
   def handle_in("reset", %{"filler" => i}, socket) do
-      name = socket.assigns[:name]
-      game = Game.new()
-      socket = assign(socket, :game, game)
-      BackupAgent.put(name, game)
-      {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
-    end
+    view = GameServer.reset(socket.assigns[:game], socket.assigns[:user])
+    broadcast(socket, "change_view", view)
+    {:reply, {:ok, %{ "game" => view}}, socket}
+  end
 
   # Add authorization logic here as required.
   defp authorized?(_payload) do
